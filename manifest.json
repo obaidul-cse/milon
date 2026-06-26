@@ -1,0 +1,17 @@
+{
+  "name": "ভল্ট — প্রাইভেট পোর্টফোলিও",
+  "short_name": "ভল্ট",
+  "description": "ব্যক্তিগত ফাইল ও নোট সংরক্ষণের জন্য প্রাইভেট, সুরক্ষিত পোর্টফোলিও",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15140F",
+  "theme_color": "#15140F",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

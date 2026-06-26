@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#15140F">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>ভল্ট — প্রাইভেট পোর্টফোলিও</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#15140F',
+          surface: '#1F1D17',
+          surface2: '#262318',
+          brass: '#C9974D',
+          brassdim: '#8C6F3E',
+          ink: '#EDEAE1',
+          muted: '#9C988A',
+          sage: '#6B9080',
+          rust: '#B85C4A',
+          edge: '#2D2A22',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          body: ['Inter', 'Noto Sans Bengali', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  body { font-family: 'Inter', 'Noto Sans Bengali', sans-serif; }
+  .modal-backdrop > div { max-height: 90dvh; overflow-y: auto; }
+  .font-display { font-family: 'Fraunces', 'Noto Sans Bengali', serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .stamp {
+    transform: rotate(-2deg);
+    border: 1px solid currentColor;
+    border-radius: 3px;
+  }
+  .tab-view { display: none; }
+  .tab-view.active { display: block; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #2D2A22; border-radius: 4px; }
+  .dial {
+    background: conic-gradient(from 0deg, #2D2A22, #C9974D, #2D2A22);
+  }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+  .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+  .modal-backdrop { backdrop-filter: blur(4px); }
+  input:focus, button:focus, textarea:focus { outline: 2px solid #C9974D; outline-offset: 1px; }
+</style>
+</head>
+<body class="bg-base text-ink min-h-screen">
+
+<div id="offline-banner" class="hidden fixed top-0 left-0 right-0 bg-rust text-ink text-xs font-mono text-center py-2 z-50 pt-[calc(0.5rem+env(safe-area-inset-top))]">
+  📡 অফলাইন — সর্বশেষ সিঙ্ক করা ডেটা দেখানো হচ্ছে
+</div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen" class="min-h-[100dvh] flex items-center justify-center px-5 py-6 overflow-y-auto">
+  <div class="w-full max-w-sm">
+
+    <div class="flex flex-col items-center mb-8">
+      <div class="relative w-20 h-20 mb-4">
+        <div class="dial w-20 h-20 rounded-full animate-spin-slow opacity-60"></div>
+        <div class="absolute inset-2 bg-base rounded-full flex items-center justify-center">
+          <svg class="w-7 h-7 text-brass" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 0v3m-6 7h12a2 2 0 002-2v-7a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2z"/>
+          </svg>
+        </div>
+      </div>
+      <h1 class="font-display text-3xl tracking-tight">ভল্ট</h1>
+      <p class="text-muted text-sm mt-1">তোমার ব্যক্তিগত সংরক্ষণাগার</p>
+    </div>
+
+    <div class="bg-surface border border-edge rounded-2xl p-6">
+
+      <!-- Step 1: email -->
+      <div id="login-step-email">
+        <label class="text-xs uppercase tracking-wider text-muted font-mono">ইমেইল অ্যাড্রেস</label>
+        <input id="email-input" type="email" placeholder="you@gmail.com"
+          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-4 py-3 text-ink placeholder-muted/60 text-sm">
+        <button onclick="sendOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-base font-semibold rounded-lg py-3 text-sm transition-colors">
+          কোড পাঠাও
+        </button>
+        <p class="text-muted text-xs mt-4 text-center leading-relaxed">তোমার ইমেইলে একটি ৬-ডিজিট কোড পাঠানো হবে।<br>সেই কোড দিয়ে লগইন ভেরিফাই হবে।</p>
+      </div>
+
+      <!-- Step 2: otp -->
+      <div id="login-step-otp" class="hidden">
+        <p class="text-sm text-muted mb-1">কোড পাঠানো হয়েছে —</p>
+        <p id="sent-to-email" class="text-sm text-brass font-mono mb-4"></p>
+        <label class="text-xs uppercase tracking-wider text-muted font-mono">৬-ডিজিট কোড</label>
+        <input id="otp-input" type="text" maxlength="6" placeholder="• • • • • •"
+          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-4 py-3 text-ink placeholder-muted/60 text-center text-xl font-mono tracking-[0.5em]">
+        <p id="otp-error" class="text-rust text-xs mt-2 hidden">কোডটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে।</p>
+        <button onclick="verifyOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-base font-semibold rounded-lg py-3 text-sm transition-colors">
+          আনলক করো
+        </button>
+        <button onclick="backToEmail()" class="w-full mt-2 text-muted text-xs py-2">← ইমেইল পরিবর্তন করো</button>
+      </div>
+
+    </div>
+    <p class="text-center text-muted/60 text-xs mt-6 font-mono">PHASE 2 · Supabase Auth দ্বারা সুরক্ষিত</p>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="app-screen" class="hidden min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]">
+<div class="max-w-md mx-auto lg:border-x lg:border-edge lg:shadow-2xl lg:shadow-black/50 min-h-[100dvh]">
+
+  <!-- Header -->
+  <header class="border-b border-edge px-5 py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex items-center justify-between sticky top-0 bg-base/95 backdrop-blur z-10">
+    <div>
+      <h1 class="font-display text-xl">ভল্ট</h1>
+      <p id="header-email" class="text-muted text-xs font-mono"></p>
+    </div>
+    <button onclick="logout()" class="text-muted hover:text-rust transition-colors p-2">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- FILES TAB -->
+  <section id="view-files" class="tab-view active px-5 py-5">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display text-lg">ফাইল সংগ্রহ</h2>
+      <span class="font-mono text-xs text-muted" id="files-count"></span>
+    </div>
+    <div id="files-grid" class="grid grid-cols-2 gap-3"></div>
+  </section>
+
+  <!-- NOTES TAB -->
+  <section id="view-notes" class="tab-view px-5 py-5">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display text-lg">নোট</h2>
+      <span class="font-mono text-xs text-muted" id="notes-count"></span>
+    </div>
+    <div id="notes-list" class="flex flex-col gap-3"></div>
+  </section>
+
+  <!-- SETTINGS TAB -->
+  <section id="view-settings" class="tab-view px-5 py-5">
+    <h2 class="font-display text-lg mb-4">সেটিংস</h2>
+
+    <div class="bg-surface border border-edge rounded-xl p-4 mb-4">
+      <p class="text-xs uppercase tracking-wider text-muted font-mono mb-2">স্টোরেজ ব্যবহার</p>
+      <div class="w-full h-2 bg-surface2 rounded-full overflow-hidden">
+        <div id="storage-bar" class="h-full bg-brass" style="width: 0%"></div>
+      </div>
+      <p id="storage-text" class="text-xs text-muted mt-2 font-mono">হিসাব হচ্ছে...</p>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <button class="settings-row" onclick="exportBackup()">
+        <svg class="w-5 h-5 text-brass" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5 7.5 12M12 16.5V3"/></svg>
+        <span>ব্যাকআপ এক্সপোর্ট করো (JSON)</span>
+      </button>
+      <button class="settings-row" onclick="triggerImport()">
+        <svg class="w-5 h-5 text-brass" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 7.5L12 3l4.5 4.5M12 3v13.5"/></svg>
+        <span>ব্যাকআপ ইম্পোর্ট করো (নোট)</span>
+      </button>
+      <input id="import-file-input" type="file" accept="application/json" class="hidden" onchange="importBackup(event)">
+      <button class="settings-row" onclick="openPinModal()">
+        <svg class="w-5 h-5 text-brass" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        <span>ডিলিট প্রোটেকশন PIN সেট করো</span>
+      </button>
+      <button class="settings-row text-rust" onclick="logout()">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+        <span>লগআউট</span>
+      </button>
+    </div>
+  </section>
+
+</div>
+<!-- /max-w-md shell -->
+
+  <!-- Floating action button (centered to match the shell width on large screens) -->
+  <div class="fixed inset-x-0 bottom-0 z-20 pointer-events-none">
+    <div class="max-w-md mx-auto relative h-0">
+      <button id="fab" onclick="handleFab()" class="pointer-events-auto absolute right-5 w-14 h-14 rounded-full bg-brass text-base shadow-lg shadow-black/40 flex items-center justify-center text-2xl" style="bottom: calc(6rem + env(safe-area-inset-bottom));">
+        +
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav (centered to match the shell width on large screens) -->
+  <nav class="fixed bottom-0 inset-x-0 bg-surface border-t border-edge flex justify-center z-20">
+    <div class="w-full max-w-md flex justify-around py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+    <button onclick="switchTab('files')" data-tab-btn="files" class="navbtn flex flex-col items-center gap-1 text-brass">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5A2.25 2.25 0 015.25 5.25h3.879a1.5 1.5 0 011.06.44l1.122 1.12a1.5 1.5 0 001.06.44H18.75A2.25 2.25 0 0121 9.5v8.25a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 17.75V7.5z"/></svg>
+      <span class="text-[10px] font-mono">ফাইল</span>
+    </button>
+    <button onclick="switchTab('notes')" data-tab-btn="notes" class="navbtn flex flex-col items-center gap-1 text-muted">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+      <span class="text-[10px] font-mono">নোট</span>
+    </button>
+    <button onclick="switchTab('settings')" data-tab-btn="settings" class="navbtn flex flex-col items-center gap-1 text-muted">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.245a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a7.665 7.665 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span class="text-[10px] font-mono">সেটিংস</span>
+    </button>
+    </div>
+  </nav>
+</div>
+<!-- /app-screen -->
+
+<!-- ============ MODAL: Upload File ============ -->
+<div id="upload-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop z-30 flex items-center justify-center px-5">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
+    <h3 class="font-display text-lg mb-4">নতুন ফাইল আপলোড</h3>
+    <label for="new-file-input" class="border border-dashed border-edge rounded-xl py-8 flex flex-col items-center gap-2 text-muted mb-4 cursor-pointer block">
+      <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 7.5L12 3l4.5 4.5M12 3v13.5"/></svg>
+      <p class="text-xs">ছবি · PDF · অডিও · ভিডিও — ট্যাপ করে বাছাই করো</p>
+      <p id="file-chosen-name" class="text-[10px] font-mono text-brass"></p>
+    </label>
+    <input id="new-file-input" type="file" accept="image/*,application/pdf,audio/*,video/*" class="hidden"
+      onchange="document.getElementById('file-chosen-name').textContent = this.files[0]?.name || ''">
+    <div class="flex gap-2">
+      <button onclick="closeModal('upload-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
+      <button onclick="uploadFile(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">যুক্ত করো</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Add/Edit Note ============ -->
+<div id="note-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop z-30 flex items-center justify-center px-5">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
+    <h3 class="font-display text-lg mb-4">নতুন নোট</h3>
+    <input id="new-note-title" type="text" placeholder="শিরোনাম"
+      class="w-full bg-surface2 border border-edge rounded-lg px-4 py-3 text-sm mb-3">
+    <textarea id="new-note-body" placeholder="তোমার নোট লিখো..." rows="5"
+      class="w-full bg-surface2 border border-edge rounded-lg px-4 py-3 text-sm mb-4 resize-none"></textarea>
+    <div class="flex gap-2 mb-4" id="color-picker">
+      <button data-color="brass" class="color-dot w-6 h-6 rounded-full bg-brass ring-2 ring-offset-2 ring-offset-surface ring-brass"></button>
+      <button data-color="sage" class="color-dot w-6 h-6 rounded-full bg-sage"></button>
+      <button data-color="rust" class="color-dot w-6 h-6 rounded-full bg-rust"></button>
+      <button data-color="muted" class="color-dot w-6 h-6 rounded-full bg-muted"></button>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="closeModal('note-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
+      <button onclick="addNote()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Delete confirm with PIN ============ -->
+<div id="delete-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop z-30 flex items-center justify-center px-5">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
+    <h3 class="font-display text-lg mb-2 text-rust">ডিলিট নিশ্চিত করো</h3>
+    <p class="text-sm text-muted mb-4" id="delete-target-name"></p>
+    <label class="text-xs uppercase tracking-wider text-muted font-mono">PIN দাও</label>
+    <input id="delete-pin-input" type="password" maxlength="4" placeholder="• • • •"
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-4 py-3 text-center text-lg font-mono tracking-[0.5em] mb-4">
+    <p class="text-[10px] text-muted font-mono mb-4 text-center">সেটিংসে সেট করা ৪-ডিজিট PIN দাও</p>
+    <div class="flex gap-2">
+      <button onclick="closeModal('delete-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-rust text-ink rounded-lg py-3 text-sm font-semibold">ডিলিট করো</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Set PIN ============ -->
+<div id="pin-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop z-30 flex items-center justify-center px-5">
+  <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
+    <h3 class="font-display text-lg mb-4">ডিলিট প্রোটেকশন PIN</h3>
+    <p class="text-sm text-muted mb-4">৪-ডিজিট PIN সেট করো — ফাইল/নোট ডিলিট করার আগে এটা চাওয়া হবে।</p>
+    <input id="set-pin-input" type="password" maxlength="4" placeholder="নতুন PIN"
+      class="w-full bg-surface2 border border-edge rounded-lg px-4 py-3 text-center text-lg font-mono tracking-[0.5em] mb-4">
+    <div class="flex gap-2">
+      <button onclick="closeModal('pin-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
+      <button onclick="setPin()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .settings-row {
+    display: flex; align-items: center; gap: 12px;
+    background: #1F1D17; border: 1px solid #2D2A22; border-radius: 12px;
+    padding: 14px 16px; font-size: 14px; text-align: left;
+  }
+  .settings-row:hover { border-color: #C9974D; }
+  .navbtn { font-size: 0; padding: 4px 12px; }
+</style>
+
+<script>
+  // ================= SUPABASE CONFIG =================
+  // এখানে তোমার Supabase প্রজেক্টের URL আর anon key পেস্ট করো (Project Settings → API)
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const BUCKET = 'portfolio-files';
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentUser = null;
+  let files = [];
+  let notes = [];
+  let pendingDelete = null;
+  let pinHash = null;
+  let realtimeChannel = null;
+
+  const typeIcon = {
+    image: '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 4.5h18M3 4.5v15a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5v-15M3 4.5V3m18 1.5V3M8.25 9.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>',
+    pdf: '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12v-1.5a2.25 2.25 0 00-2.25-2.25h-1.5a2.25 2.25 0 00-2.25 2.25v1.5m6-12H6.75A2.25 2.25 0 004.5 6v13.5A2.25 2.25 0 006.75 21.75h10.5A2.25 2.25 0 0019.5 19.5V8.25L14.25 3z"/></svg>',
+    audio: '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3v11.25a2.25 2.25 0 11-2.25-2.25h0a2.25 2.25 0 11-2.25 2.25V10.5L9 13.5v3.75a2.25 2.25 0 11-2.25-2.25h0A2.25 2.25 0 119 17.25V9z"/></svg>',
+    video: '<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>',
+  };
+
+  // ================= Auth =================
+  async function sendOtp() {
+    const email = document.getElementById('email-input').value.trim();
+    if (!email.includes('@')) { alert('সঠিক ইমেইল দাও'); return; }
+    const { error } = await sb.auth.signInWithOtp({ email });
+    if (error) { alert('কোড পাঠাতে সমস্যা হয়েছে: ' + error.message); return; }
+    document.getElementById('sent-to-email').textContent = email;
+    document.getElementById('login-step-email').classList.add('hidden');
+    document.getElementById('login-step-otp').classList.remove('hidden');
+  }
+
+  function backToEmail() {
+    document.getElementById('login-step-otp').classList.add('hidden');
+    document.getElementById('login-step-email').classList.remove('hidden');
+  }
+
+  async function verifyOtp() {
+    const email = document.getElementById('sent-to-email').textContent;
+    const code = document.getElementById('otp-input').value.trim();
+    const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error) {
+      document.getElementById('otp-error').classList.remove('hidden');
+      return;
+    }
+    await enterApp(data.user);
+  }
+
+  async function enterApp(user) {
+    currentUser = user;
+    document.getElementById('header-email').textContent = user.email;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-screen').classList.remove('hidden');
+    switchTab('files');
+    await loadPin();
+    await Promise.all([loadFiles(), loadNotes()]);
+    subscribeRealtime();
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    if (realtimeChannel) sb.removeChannel(realtimeChannel);
+    currentUser = null; files = []; notes = []; pinHash = null;
+    document.getElementById('app-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-step-otp').classList.add('hidden');
+    document.getElementById('login-step-email').classList.remove('hidden');
+    document.getElementById('email-input').value = '';
+    document.getElementById('otp-input').value = '';
+    document.getElementById('otp-error').classList.add('hidden');
+  }
+
+  // Auto-restore session on reload / new device with saved session
+  (async () => {
+    const { data } = await sb.auth.getSession();
+    if (data.session?.user) await enterApp(data.session.user);
+  })();
+
+  // ================= Files =================
+  async function loadFiles() {
+    try {
+      const { data, error } = await sb.from('files').select('*').order('uploaded_at', { ascending: false });
+      if (error) throw error;
+      files = data || [];
+      try { localStorage.setItem('vault_files_cache', JSON.stringify(files)); } catch {}
+    } catch (err) {
+      console.error(err);
+      const cached = localStorage.getItem('vault_files_cache');
+      if (cached) files = JSON.parse(cached);
+    }
+    await renderFiles();
+    updateStorageBar();
+  }
+
+  async function renderFiles() {
+    const grid = document.getElementById('files-grid');
+    const cards = await Promise.all(files.map(async f => {
+      let thumb = `<div class="text-brass">${typeIcon[f.file_type] || typeIcon.pdf}</div>`;
+      if (f.file_type === 'image') {
+        try {
+          const { data } = await sb.storage.from(BUCKET).createSignedUrl(f.storage_path, 3600);
+          if (data?.signedUrl) thumb = `<img src="${data.signedUrl}" class="w-full h-20 object-cover rounded-lg">`;
+        } catch {}
+      }
+      const dateStr = new Date(f.uploaded_at).toLocaleDateString('bn-BD', { day: '2-digit', month: 'short', year: 'numeric' });
+      return `
+        <div class="bg-surface border border-edge rounded-xl p-3 flex flex-col gap-2">
+          ${thumb}
+          <p class="text-sm truncate">${f.file_name}</p>
+          <div class="flex items-center justify-between mt-1">
+            <span class="stamp font-mono text-[10px] text-brass px-2 py-0.5">${dateStr}</span>
+            <button onclick="askDelete('file', '${f.id}', '${f.file_name.replace(/'/g, "\\'")}')" class="text-muted hover:text-rust p-1">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }));
+    grid.innerHTML = cards.join('');
+    document.getElementById('files-count').textContent = files.length + ' টি ফাইল';
+  }
+
+  function detectType(file) {
+    if (file.type.startsWith('image/')) return 'image';
+    if (file.type.startsWith('audio/')) return 'audio';
+    if (file.type.startsWith('video/')) return 'video';
+    return 'pdf';
+  }
+
+  async function uploadFile(btn) {
+    const input = document.getElementById('new-file-input');
+    const file = input.files[0];
+    if (!file) { alert('একটা ফাইল বাছাই করো'); return; }
+    const type = detectType(file);
+    const path = `${currentUser.id}/${Date.now()}_${file.name}`;
+    btn.disabled = true; btn.textContent = 'আপলোড হচ্ছে...';
+    const { error: upErr } = await sb.storage.from(BUCKET).upload(path, file);
+    if (upErr) {
+      alert('আপলোড ব্যর্থ: ' + upErr.message);
+      btn.disabled = false; btn.textContent = 'যুক্ত করো';
+      return;
+    }
+    const { error: dbErr } = await sb.from('files').insert({
+      user_id: currentUser.id, file_name: file.name, storage_path: path,
+      file_type: type, file_size: file.size,
+    });
+    if (dbErr) alert('তথ্য সেভ করতে সমস্যা: ' + dbErr.message);
+    btn.disabled = false; btn.textContent = 'যুক্ত করো';
+    input.value = '';
+    document.getElementById('file-chosen-name').textContent = '';
+    closeModal('upload-modal');
+    await loadFiles();
+  }
+
+  function updateStorageBar() {
+    const totalBytes = files.reduce((sum, f) => sum + (f.file_size || 0), 0);
+    const limitBytes = 1024 * 1024 * 1024; // 1 GB অনুমান (Supabase ফ্রি টিয়ার)
+    const pct = Math.min(100, (totalBytes / limitBytes) * 100);
+    document.getElementById('storage-bar').style.width = pct.toFixed(1) + '%';
+    document.getElementById('storage-text').textContent =
+      (totalBytes / (1024 * 1024)).toFixed(1) + ' MB / 1 GB ব্যবহৃত (আনুমানিক)';
+  }
+
+  // ================= Notes =================
+  async function loadNotes() {
+    try {
+      const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      notes = data || [];
+      try { localStorage.setItem('vault_notes_cache', JSON.stringify(notes)); } catch {}
+    } catch (err) {
+      console.error(err);
+      const cached = localStorage.getItem('vault_notes_cache');
+      if (cached) notes = JSON.parse(cached);
+    }
+    renderNotes();
+  }
+
+  function renderNotes() {
+    const list = document.getElementById('notes-list');
+    list.innerHTML = notes.map(n => {
+      const dateStr = new Date(n.created_at).toLocaleDateString('bn-BD', { day: '2-digit', month: 'short', year: 'numeric' });
+      const color = n.color_tag || 'brass';
+      return `
+        <div class="bg-surface border-l-4 border-${color} border-y border-r border-edge rounded-r-xl p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="font-display text-base mb-1 truncate">${n.title}</h3>
+              <p class="text-sm text-muted line-clamp-2">${n.body || ''}</p>
+            </div>
+            <button onclick="askDelete('note', '${n.id}', '${n.title.replace(/'/g, "\\'")}')" class="text-muted hover:text-rust p-1 shrink-0">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            </button>
+          </div>
+          <span class="stamp font-mono text-[10px] text-${color} px-2 py-0.5 inline-block mt-2">${dateStr}</span>
+        </div>`;
+    }).join('');
+    document.getElementById('notes-count').textContent = notes.length + ' টি নোট';
+  }
+
+  async function addNote() {
+    const title = document.getElementById('new-note-title').value.trim() || 'শিরোনাম-ছাড়া';
+    const body = document.getElementById('new-note-body').value.trim();
+    const color = document.querySelector('.color-dot.ring-2')?.dataset.color || 'brass';
+    const { error } = await sb.from('notes').insert({ user_id: currentUser.id, title, body, color_tag: color });
+    if (error) { alert('নোট সেভ করতে সমস্যা: ' + error.message); return; }
+    document.getElementById('new-note-title').value = '';
+    document.getElementById('new-note-body').value = '';
+    closeModal('note-modal');
+    await loadNotes();
+  }
+
+  // ================= Delete protection (PIN) =================
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function loadPin() {
+    const { data } = await sb.from('admin_protection').select('delete_pin_hash').eq('user_id', currentUser.id).maybeSingle();
+    pinHash = data?.delete_pin_hash || null;
+  }
+
+  function openPinModal() { openModal('pin-modal'); }
+
+  async function setPin() {
+    const pin = document.getElementById('set-pin-input').value.trim();
+    if (pin.length !== 4) { alert('৪-ডিজিট PIN দাও'); return; }
+    const hash = await sha256Hex(pin);
+    const { error } = await sb.from('admin_protection').upsert({ user_id: currentUser.id, delete_pin_hash: hash });
+    if (error) { alert('PIN সেভ করতে সমস্যা: ' + error.message); return; }
+    pinHash = hash;
+    document.getElementById('set-pin-input').value = '';
+    closeModal('pin-modal');
+    alert('PIN সেভ হয়েছে।');
+  }
+
+  function askDelete(kind, id, name) {
+    if (!pinHash) {
+      alert('আগে একটা ডিলিট PIN সেট করো (সেটিংস → ডিলিট প্রোটেকশন PIN)।');
+      openPinModal();
+      return;
+    }
+    pendingDelete = { kind, id };
+    document.getElementById('delete-target-name').textContent = `"${name}" — এই ${kind === 'file' ? 'ফাইলটি' : 'নোটটি'} স্থায়ীভাবে মুছে যাবে।`;
+    document.getElementById('delete-pin-input').value = '';
+    openModal('delete-modal');
+  }
+
+  async function confirmDelete() {
+    const pin = document.getElementById('delete-pin-input').value.trim();
+    const hash = await sha256Hex(pin);
+    if (hash !== pinHash) { alert('PIN সঠিক নয়।'); return; }
+    if (pendingDelete.kind === 'file') {
+      const f = files.find(x => x.id === pendingDelete.id);
+      if (f) await sb.storage.from(BUCKET).remove([f.storage_path]);
+      await sb.from('files').delete().eq('id', pendingDelete.id);
+      await loadFiles();
+    } else {
+      await sb.from('notes').delete().eq('id', pendingDelete.id);
+      await loadNotes();
+    }
+    closeModal('delete-modal');
+  }
+
+  // ================= Export / Import =================
+  function exportBackup() {
+    const payload = {
+      exported_at: new Date().toISOString(),
+      notes: notes.map(n => ({ title: n.title, body: n.body, color_tag: n.color_tag, created_at: n.created_at })),
+      files_metadata: files.map(f => ({ file_name: f.file_name, file_type: f.file_type, file_size: f.file_size, uploaded_at: f.uploaded_at })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `vault-backup-${Date.now()}.json`;
+    a.click();
+  }
+
+  function triggerImport() { document.getElementById('import-file-input').click(); }
+
+  async function importBackup(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    let payload;
+    try { payload = JSON.parse(text); } catch { alert('ফাইলটি সঠিক JSON নয়।'); return; }
+    if (Array.isArray(payload.notes)) {
+      for (const n of payload.notes) {
+        await sb.from('notes').insert({ user_id: currentUser.id, title: n.title, body: n.body, color_tag: n.color_tag });
+      }
+      alert('নোট ইম্পোর্ট সম্পন্ন। (ফাইলের আসল কনটেন্ট ব্যাকআপে থাকে না — ফাইল আলাদাভাবে আপলোড করতে হবে)');
+      await loadNotes();
+    } else {
+      alert('এই ব্যাকআপ ফাইলে কোনো নোট পাওয়া যায়নি।');
+    }
+    e.target.value = '';
+  }
+
+  // ================= Tabs / Modals =================
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + tab).classList.add('active');
+    document.querySelectorAll('.navbtn').forEach(b => b.classList.remove('text-brass'));
+    document.querySelectorAll('.navbtn').forEach(b => b.classList.add('text-muted'));
+    document.querySelector(`[data-tab-btn="${tab}"]`).classList.remove('text-muted');
+    document.querySelector(`[data-tab-btn="${tab}"]`).classList.add('text-brass');
+    document.getElementById('fab').style.display = (tab === 'settings') ? 'none' : 'flex';
+    window.currentTab = tab;
+  }
+
+  function handleFab() {
+    if (window.currentTab === 'notes') openModal('note-modal');
+    else openModal('upload-modal');
+  }
+
+  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+  document.querySelectorAll('.color-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('ring-2','ring-offset-2','ring-offset-surface', `ring-${d.dataset.color}`));
+      dot.classList.add('ring-2','ring-offset-2','ring-offset-surface', `ring-${dot.dataset.color}`);
+    });
+  });
+
+  // ================= Realtime sync (multi-device) =================
+  function subscribeRealtime() {
+    realtimeChannel = sb.channel('vault-sync-' + currentUser.id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'files', filter: `user_id=eq.${currentUser.id}` }, loadFiles)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: `user_id=eq.${currentUser.id}` }, loadNotes)
+      .subscribe();
+  }
+
+  // ================= Offline banner =================
+  function updateOnlineStatus() {
+    const banner = document.getElementById('offline-banner');
+    if (!navigator.onLine) banner.classList.remove('hidden');
+    else banner.classList.add('hidden');
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  // ================= Service Worker (PWA offline + installable) =================
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed:', err));
+    });
+  }
+</script>
+
+</body>
+</html>
