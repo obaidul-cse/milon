@@ -17,7 +17,7 @@
     theme: {
       extend: {
         colors: {
-          base: '#0D1117',
+          navy: '#0D1117',
           surface: '#161B22',
           surface2: '#1B2240',
           brass: '#2DA44E',
@@ -40,9 +40,6 @@
 <style>
   html, body { overflow-x: hidden; max-width: 100vw; }
   body { font-family: 'Inter', 'Hind Siliguri', sans-serif; }
-  input, textarea, select {
-  color: #ffffff !important;
-}
   .modal-backdrop > div { max-height: 90dvh; overflow-y: auto; }
   .font-display { font-family: 'Fraunces', 'Noto Sans Bengali', serif; }
   .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -105,14 +102,14 @@
     <div class="flex flex-col items-center mb-8">
       <div class="relative w-20 h-20 mb-4">
         <div class="dial w-20 h-20 rounded-full animate-spin-slow opacity-60"></div>
-        <div class="absolute inset-2 bg-base rounded-full flex items-center justify-center">
+        <div class="absolute inset-2 bg-navy rounded-full flex items-center justify-center">
           <svg class="w-7 h-7 text-brass" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 0v3m-6 7h12a2 2 0 002-2v-7a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2z"/>
           </svg>
         </div>
       </div>
       <h1 class="font-display text-4xl tracking-tight">ভল্ট</h1>
-      <p class="text-muted text-base mt-1">তোমার ব্যক্তিগত সংরক্ষণাগার</p>
+      <p class="text-muted mt-1">তোমার ব্যক্তিগত সংরক্ষণাগার</p>
     </div>
 
     <div class="bg-surface border border-edge rounded-2xl p-7 shadow-[0_0_70px_-15px_rgba(137,87,229,0.45)]">
@@ -121,12 +118,12 @@
       <div id="login-step-password">
         <label class="text-sm uppercase tracking-wider text-muted font-mono">ইমেইল অ্যাড্রেস</label>
         <input id="pw-email-input" type="email" placeholder="you@gmail.com"
-          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base placeholder-muted/60">
+          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink placeholder-muted/60">
         <label class="text-sm uppercase tracking-wider text-muted font-mono mt-4 block">পাসওয়ার্ড</label>
         <input id="pw-password-input" type="password" placeholder="••••••••"
-          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base placeholder-muted/60">
+          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink placeholder-muted/60">
         <p id="pw-error" class="text-rust text-sm mt-2 hidden">ইমেইল বা পাসওয়ার্ড সঠিক নয়।</p>
-        <button onclick="loginWithPassword()" class="w-full mt-4 bg-brass hover:bg-brassdim text-base font-semibold rounded-lg py-4 text-base transition-colors">
+        <button onclick="loginWithPassword()" class="w-full mt-4 bg-brass hover:bg-brassdim text-navy font-semibold rounded-lg py-4 text-navy transition-colors">
           লগইন করো
         </button>
         <button onclick="showOtpEmailStep()" class="w-full mt-3 text-muted text-sm py-2">পাসওয়ার্ড নেই বা ভুলে গেছ? ইমেইল কোড দিয়ে লগইন করো →</button>
@@ -136,8 +133,8 @@
       <div id="login-step-email" class="hidden">
         <label class="text-sm uppercase tracking-wider text-muted font-mono">ইমেইল অ্যাড্রেস</label>
         <input id="email-input" type="email" placeholder="you@gmail.com"
-          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base placeholder-muted/60">
-        <button onclick="sendOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-base font-semibold rounded-lg py-4 text-base transition-colors">
+          class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink placeholder-muted/60">
+        <button onclick="sendOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-navy font-semibold rounded-lg py-4 text-navy transition-colors">
           কোড পাঠাও
         </button>
         <p class="text-muted text-sm mt-4 text-center leading-relaxed">তোমার ইমেইলে একটি ৬-ডিজিট কোড পাঠানো হবে।<br>সেই কোড দিয়ে লগইন ভেরিফাই হবে।</p>
@@ -146,13 +143,13 @@
 
       <!-- Step 3: otp -->
       <div id="login-step-otp" class="hidden">
-        <p class="text-base text-muted mb-1">কোড পাঠানো হয়েছে —</p>
-        <p id="sent-to-email" class="text-base text-brass font-mono mb-4"></p>
+        <p class=" text-muted mb-1">কোড পাঠানো হয়েছে —</p>
+        <p id="sent-to-email" class=" text-brass font-mono mb-4"></p>
         <label class="text-sm uppercase tracking-wider text-muted font-mono">৬-ডিজিট কোড</label>
         <input id="otp-input" type="text" maxlength="6" placeholder="• • • • • •"
           class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink placeholder-muted/60 text-center text-2xl font-mono tracking-[0.5em]">
         <p id="otp-error" class="text-rust text-sm mt-2 hidden">কোডটি সঠিক নয় বা মেয়াদ শেষ হয়ে গেছে।</p>
-        <button onclick="verifyOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-base font-semibold rounded-lg py-4 text-base transition-colors">
+        <button onclick="verifyOtp()" class="w-full mt-4 bg-brass hover:bg-brassdim text-navy font-semibold rounded-lg py-4 text-navy transition-colors">
           আনলক করো
         </button>
         <button onclick="backToEmail()" class="w-full mt-2 text-muted text-sm py-2">← ইমেইল পরিবর্তন করো</button>
@@ -168,7 +165,7 @@
 <div class="max-w-md mx-auto lg:border-x lg:border-edge lg:shadow-2xl lg:shadow-black/50 min-h-[100dvh]">
 
   <!-- Header -->
-  <header class="border-b border-edge px-5 py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex items-center justify-between sticky top-0 bg-base/95 backdrop-blur z-10">
+  <header class="border-b border-edge px-5 py-4 pt-[calc(1rem+env(safe-area-inset-top))] flex items-center justify-between sticky top-0 bg-navy/95 backdrop-blur z-10">
     <div>
       <h1 class="font-display text-xl">ভল্ট</h1>
       <p id="header-email" class="text-muted text-xs font-mono"></p>
@@ -225,7 +222,7 @@
       <span class="font-mono text-xs text-muted" id="quotes-count"></span>
     </div>
     <input id="quote-search" type="text" placeholder="🔍 উক্তি, উৎস বা বিষয় খুঁজো..." oninput="searchQuotes(this.value)"
-      class="w-full mb-4 bg-surface2 border border-edge rounded-lg px-5 py-3 text-base text-ink placeholder-muted/60">
+      class="w-full mb-4 bg-surface2 border border-edge rounded-lg px-5 py-3 text-ink placeholder-muted/60">
     <div id="quote-categories" class="flex flex-wrap gap-2 mb-4"></div>
     <div id="quotes-list" class="flex flex-col gap-3"></div>
   </section>
@@ -287,7 +284,7 @@
   <!-- Floating action button (centered to match the shell width on large screens) -->
   <div class="fixed inset-x-0 bottom-0 z-20 pointer-events-none">
     <div class="max-w-md mx-auto relative h-0">
-      <button id="fab" onclick="handleFab()" class="pointer-events-auto absolute right-5 w-14 h-14 rounded-full bg-brass text-base shadow-lg shadow-black/40 flex items-center justify-center text-2xl" style="bottom: calc(6rem + env(safe-area-inset-bottom));">
+      <button id="fab" onclick="handleFab()" class="pointer-events-auto absolute right-5 w-14 h-14 rounded-full bg-brass text-navy shadow-lg shadow-black/40 flex items-center justify-center text-2xl" style="bottom: calc(6rem + env(safe-area-inset-bottom));">
         +
       </button>
     </div>
@@ -341,7 +338,7 @@
       onchange="document.getElementById('file-chosen-name').textContent = this.files[0]?.name || ''">
     <div class="flex gap-2">
       <button onclick="closeModal('upload-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="uploadFile(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">যুক্ত করো</button>
+      <button onclick="uploadFile(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">যুক্ত করো</button>
     </div>
   </div>
 </div>
@@ -351,10 +348,10 @@
   <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
     <h3 class="font-display text-lg mb-4">নতুন ফোল্ডার</h3>
     <input id="new-folder-name" type="text" placeholder="ফোল্ডারের নাম"
-      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-4">
+      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('folder-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="addFolder(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">তৈরি করো</button>
+      <button onclick="addFolder(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">তৈরি করো</button>
     </div>
   </div>
 </div>
@@ -372,10 +369,10 @@
 <div id="rename-modal" class="hidden fixed inset-0 bg-black/60 modal-backdrop z-30 flex items-center justify-center px-5">
   <div class="bg-surface border border-edge rounded-2xl p-6 w-full max-w-sm">
     <h3 class="font-display text-lg mb-4">নাম পরিবর্তন</h3>
-    <input id="rename-input" type="text" class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-4">
+    <input id="rename-input" type="text" class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('rename-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="confirmRename()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="confirmRename()" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -397,22 +394,22 @@
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">উক্তি</label>
     <textarea id="new-quote-text" placeholder="উক্তিটি লিখো..." rows="3"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3 resize-none"></textarea>
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3 resize-none"></textarea>
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">উৎস (ব্যক্তি/বই/গ্রন্থ)</label>
     <input id="new-quote-source" type="text" placeholder="যেমন: জালালুদ্দিন রুমি"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">বিষয়/ক্যাটাগরি</label>
     <input id="new-quote-category" type="text" placeholder="যেমন: ধৈর্য, জ্ঞান, বা নতুন কিছু"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">রঙ</label>
     <div id="quote-color-picker" class="flex gap-2 flex-wrap mt-2 mb-4"></div>
 
     <div class="flex gap-2">
       <button onclick="closeModal('quote-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="saveQuote(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="saveQuote(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -425,16 +422,16 @@
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">খাতের/সাইটের নাম</label>
     <input id="new-password-site" type="text" placeholder="যেমন: Facebook, Gmail, ব্যাংক অ্যাকাউন্ট"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">ইউজারনেম/ইমেইল (ঐচ্ছিক)</label>
     <input id="new-password-username" type="text" placeholder="যেমন: atikuzzaman53@gmail.com"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">পাসওয়ার্ড</label>
     <div class="relative mt-2 mb-3">
       <input id="new-password-value" type="password" placeholder="পাসওয়ার্ড"
-        class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 pr-12 text-ink text-base">
+        class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 pr-12 text-ink">
       <button type="button" onclick="toggleNewPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted">
         <svg id="new-password-eye-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </button>
@@ -442,11 +439,11 @@
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">নোট (ঐচ্ছিক)</label>
     <textarea id="new-password-notes" placeholder="রিকভারি তথ্য, সিকিউরিটি প্রশ্ন ইত্যাদি..." rows="2"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-4 resize-none"></textarea>
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-4 resize-none"></textarea>
 
     <div class="flex gap-2">
       <button onclick="closeModal('password-entry-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="savePassword(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="savePassword(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -460,7 +457,7 @@
       class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-center text-xl font-mono tracking-[0.5em] mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('pin-confirm-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="submitPinConfirm()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">নিশ্চিত করো</button>
+      <button onclick="submitPinConfirm()" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">নিশ্চিত করো</button>
     </div>
   </div>
 </div>
@@ -471,9 +468,9 @@
     <h3 id="note-modal-title" class="font-display text-lg mb-4">নতুন নোট</h3>
     <input type="hidden" id="editing-note-id" value="">
     <input id="new-note-title" type="text" placeholder="শিরোনাম"
-      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
     <textarea id="new-note-body" placeholder="তোমার নোট লিখো..." rows="5"
-      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-4 resize-none"></textarea>
+      class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-4 resize-none"></textarea>
     <div class="flex items-center justify-between mb-4">
       <div class="flex gap-2" id="color-picker">
         <button data-color="brass" class="color-dot w-6 h-6 rounded-full bg-brass ring-2 ring-offset-2 ring-offset-surface ring-brass"></button>
@@ -487,7 +484,7 @@
     </div>
     <div class="flex gap-2">
       <button onclick="closeModal('note-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="saveNote(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="saveNote(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -500,15 +497,15 @@
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">বিষয়</label>
     <input id="new-event-title" type="text" placeholder="যেমন: ব্যাংকে যাওয়া, মিটিং"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">তারিখ ও সময়</label>
     <input id="new-event-datetime" type="datetime-local"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">বিস্তারিত (ঐচ্ছিক)</label>
     <textarea id="new-event-desc" placeholder="বিস্তারিত লিখো..." rows="3"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3 resize-none"></textarea>
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3 resize-none"></textarea>
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">ছবি (ঐচ্ছিক)</label>
     <input id="new-event-image" type="file" accept="image/*"
@@ -516,7 +513,7 @@
 
     <label class="text-sm uppercase tracking-wider text-muted font-mono">কত মিনিট আগে রিমাইন্ড করবে?</label>
     <input id="new-event-remind" type="number" min="1" value="30"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-2">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-2">
     <div class="flex gap-2 mb-4 flex-wrap">
       <button onclick="document.getElementById('new-event-remind').value=15" class="px-3 py-1 rounded-full text-xs border border-edge text-muted">১৫ মিনিট</button>
       <button onclick="document.getElementById('new-event-remind').value=30" class="px-3 py-1 rounded-full text-xs border border-edge text-muted">৩০ মিনিট</button>
@@ -526,7 +523,7 @@
 
     <div class="flex gap-2">
       <button onclick="closeModal('event-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="saveEvent(this)" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="saveEvent(this)" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -554,13 +551,13 @@
     <p class="text-sm text-muted mb-4">একবার সেট করলে পরের বার থেকে ইমেইল + এই পাসওয়ার্ড দিয়েই সরাসরি লগইন করতে পারবে — ইমেইল কোডের জন্য আর অপেক্ষা করতে হবে না।</p>
     <label class="text-sm uppercase tracking-wider text-muted font-mono">নতুন পাসওয়ার্ড</label>
     <input id="new-password-input" type="password" placeholder="কমপক্ষে ৬ ক্যারেক্টার"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-3">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-3">
     <label class="text-sm uppercase tracking-wider text-muted font-mono">আবার লিখো</label>
     <input id="confirm-password-input" type="password" placeholder="পাসওয়ার্ড আবার লিখো"
-      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink text-base mb-4">
+      class="w-full mt-2 bg-surface2 border border-edge rounded-lg px-5 py-4 text-ink mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('password-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="setPassword()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="setPassword()" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -574,7 +571,7 @@
       class="w-full bg-surface2 border border-edge rounded-lg px-5 py-4 text-center text-xl font-mono tracking-[0.5em] mb-4">
     <div class="flex gap-2">
       <button onclick="closeModal('pin-modal')" class="flex-1 border border-edge rounded-lg py-3 text-sm text-muted">বাতিল</button>
-      <button onclick="setPin()" class="flex-1 bg-brass text-base rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
+      <button onclick="setPin()" class="flex-1 bg-brass text-navy rounded-lg py-3 text-sm font-semibold">সেভ করো</button>
     </div>
   </div>
 </div>
@@ -779,7 +776,7 @@
     currentRenderedQuotes = items;
     document.getElementById('quotes-list').innerHTML = items.length ? items.map((q, i) => `
       <div class="bg-surface border-y border-r rounded-r-xl p-4" style="border-color:${q.color}33; border-left:4px solid ${q.color};">
-        <p class="text-base leading-relaxed text-ink">“${escapeHtml(q.text)}”</p>
+        <p class=" leading-relaxed text-ink">“${escapeHtml(q.text)}”</p>
         <div class="flex items-center justify-between mt-3 gap-2 flex-wrap">
           <span class="font-mono text-xs text-muted">— ${escapeHtml(q.source || '')}</span>
           <div class="flex items-center gap-1.5 shrink-0">
@@ -918,7 +915,7 @@
             </div>
           </div>
           <div class="flex items-center gap-2 mt-3 bg-surface2 border border-edge rounded-lg px-4 py-3">
-            <span class="font-mono text-base text-ink flex-1 truncate">${revealed ? escapeHtml(p.password_value) : '••••••••••'}</span>
+            <span class="font-mono text-ink flex-1 truncate">${revealed ? escapeHtml(p.password_value) : '••••••••••'}</span>
             <button onclick="togglePasswordView('${p.id}')" class="text-muted hover:text-brass p-1" title="দেখাও/লুকাও">
               ${revealed
                 ? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>`
